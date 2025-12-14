@@ -1,14 +1,15 @@
+<!-- גרסה מתקדמת של שעת האפס עם מסך פתיחה, רצף 5 לילות, וצבעים רכים -->
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>שעת האפס 🌙</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
       margin: 0;
       font-family: system-ui, sans-serif;
-      background: linear-gradient(#2b243a, #1f1b2e);
+      background: linear-gradient(160deg, #2b243a, #3a2f4d, #1f1b2e);
       color: #f5f3f7;
       display: flex;
       justify-content: center;
@@ -17,31 +18,47 @@
     }
 
     .app {
-      background: rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.12);
       padding: 26px;
-      border-radius: 26px;
+      border-radius: 28px;
       width: 330px;
       text-align: center;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-      backdrop-filter: blur(6px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+      backdrop-filter: blur(8px);
+      display: none;
     }
 
-    h1 {
-      margin-top: 0;
-      font-weight: 600;
+    .splash {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(160deg, #3a2f4d, #1f1b2e);
+      animation: fadeOut 1s ease forwards;
+      animation-delay: 2.5s;
     }
 
-    .time {
-      font-size: 24px;
-      margin: 14px 0;
+    .splash h1 {
+      font-size: 32px;
+      margin: 0;
     }
 
-    label {
-      display: block;
-      margin-top: 16px;
-      font-size: 14px;
-      opacity: 0.9;
+    .splash p {
+      margin-top: 10px;
+      opacity: 0.8;
     }
+
+    @keyframes fadeOut {
+      to { opacity: 0; visibility: hidden; }
+    }
+
+    h1 { margin-top: 0; }
+
+    .time { font-size: 24px; margin: 14px 0; }
+
+    label { display:block; margin-top:16px; font-size:14px; opacity:0.9; }
 
     input, textarea {
       width: 100%;
@@ -59,49 +76,34 @@
       width: 100%;
       padding: 14px;
       font-size: 16px;
-      border-radius: 20px;
+      border-radius: 22px;
       border: none;
       cursor: pointer;
-      background: #e6c9ff;
+      background: linear-gradient(135deg, #e6c9ff, #f7e7ff);
       color: #2b243a;
       font-weight: 600;
     }
 
-    button:hover {
-      background: #f0dcff;
-    }
-
-    .message {
-      margin-top: 16px;
-      font-size: 15px;
-    }
-
-    .history {
-      margin-top: 16px;
-      font-size: 13px;
-      max-height: 90px;
-      overflow-y: auto;
-      text-align: right;
-      opacity: 0.85;
-    }
+    .message { margin-top: 16px; font-size: 15px; }
+    .history { margin-top: 16px; font-size: 13px; max-height: 90px; overflow-y: auto; opacity: 0.85; }
   </style>
 </head>
-
 <body>
-<div class="app">
-  <h1>שעת האפס 🌙</h1>
 
+<div class="splash" id="splash">
+  <h1>שעת האפס 🌙</h1>
+  <p>הרגע שבו היום נגמר</p>
+</div>
+
+<div class="app" id="app">
+  <h1>שעת האפס 🌙</h1>
   <div class="time" id="clock">--:--</div>
 
   <label>מתי בא לך ללכת לישון?</label>
-  <input type="time" id="sleepTime">
+  <input type="time" id="sleepTime" />
 
   <button onclick="saveSleepTime()">💾 שמירת שעת שינה</button>
-
   <button onclick="goToSleep()">🌙 לילה טוב!!!</button>
-
-  <label>חיזוק אישי (אופציונלי)</label>
-  <textarea id="customMessage" placeholder="משהו טוב להגיד לעצמך..."></textarea>
 
   <div class="message" id="message"></div>
   <div class="history" id="history"></div>
@@ -111,45 +113,55 @@
   const messages = [
     "בחירה רכה וטובה 💙",
     "זה רגע יפה לעצור בו",
-    "מחר את תודה לעצמך 🌙",
     "גם מנוחה היא התקדמות",
-    "איזה יום… הגיע זמן שמיכה"
+    "מחר את תודה לעצמך 🌙"
   ];
 
   function updateClock() {
     const now = new Date();
-    document.getElementById("clock").innerText =
-      now.toLocaleTimeString("he-IL", { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('clock').innerText = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
   }
-
-  setInterval(updateClock, 1000);
-  updateClock();
+  setInterval(updateClock, 1000); updateClock();
 
   function saveSleepTime() {
-    const time = document.getElementById("sleepTime").value;
-    localStorage.setItem("sleepTime", time);
-    document.getElementById("message").innerText = "שעת האפס נשמרה 🌙";
+    const time = document.getElementById('sleepTime').value;
+    localStorage.setItem('sleepTime', time);
+    document.getElementById('message').innerText = 'שעת האפס נשמרה 🌙';
   }
 
   function goToSleep() {
-    const custom = document.getElementById("customMessage").value;
-    const msg = custom || messages[Math.floor(Math.random() * messages.length)];
-    document.getElementById("message").innerText = msg;
+    const today = new Date().toDateString();
+    let streak = JSON.parse(localStorage.getItem('streak') || '{}');
 
-    const history = JSON.parse(localStorage.getItem("history") || "[]");
-    history.unshift(new Date().toLocaleString("he-IL"));
-    localStorage.setItem("history", JSON.stringify(history.slice(0, 10)));
+    if (streak.last === today) return;
 
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    streak.count = streak.last === yesterday ? (streak.count || 1) + 1 : 1;
+    streak.last = today;
+
+    localStorage.setItem('streak', JSON.stringify(streak));
+
+    let msg = messages[Math.floor(Math.random() * messages.length)];
+    if (streak.count === 5) {
+      msg = '✨ 5 לילות ברצף! זה מדהים. ✨';
+    }
+
+    document.getElementById('message').innerText = msg;
     renderHistory();
   }
 
   function renderHistory() {
-    const history = JSON.parse(localStorage.getItem("history") || "[]");
-    document.getElementById("history").innerHTML =
-      history.map(h => "🌙 " + h).join("<br>");
+    const history = JSON.parse(localStorage.getItem('history') || '[]');
+    history.unshift(new Date().toLocaleString('he-IL'));
+    localStorage.setItem('history', JSON.stringify(history.slice(0,10)));
+    document.getElementById('history').innerHTML = history.map(h => '🌙 ' + h).join('<br>');
   }
 
-  renderHistory();
+  setTimeout(() => {
+    document.getElementById('splash').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+  }, 3000);
 </script>
 </body>
 </html>
+

@@ -1,167 +1,212 @@
-<!-- גרסה מתקדמת של שעת האפס עם מסך פתיחה, רצף 5 לילות, וצבעים רכים -->
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>שעת האפס 🌙</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>שעת האפס 🌙</title>
   <style>
     body {
       margin: 0;
-      font-family: system-ui, sans-serif;
-      background: linear-gradient(160deg, #2b243a, #3a2f4d, #1f1b2e);
-      color: #f5f3f7;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #2b1055, #7597de);
+      color: white;
+      min-height: 100vh;
       display: flex;
-      justify-content: center;
       align-items: center;
-      height: 100vh;
+      justify-content: center;
     }
 
-    .app {
+    .card {
       background: rgba(255,255,255,0.12);
-      padding: 26px;
-      border-radius: 28px;
-      width: 330px;
-      text-align: center;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.45);
-      backdrop-filter: blur(8px);
-      display: none;
-    }
-
-    .splash {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(160deg, #3a2f4d, #1f1b2e);
-      animation: fadeOut 1s ease forwards;
-      animation-delay: 2.5s;
-    }
-
-    .splash h1 {
-      font-size: 32px;
-      margin: 0;
-    }
-
-    .splash p {
-      margin-top: 10px;
-      opacity: 0.8;
-    }
-
-    @keyframes fadeOut {
-      to { opacity: 0; visibility: hidden; }
-    }
-
-    h1 { margin-top: 0; }
-
-    .time { font-size: 24px; margin: 14px 0; }
-
-    label { display:block; margin-top:16px; font-size:14px; opacity:0.9; }
-
-    input, textarea {
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      padding: 24px;
       width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 1.8em;
+    }
+
+    label {
+      display: block;
+      margin-top: 16px;
+      font-size: 0.95em;
+      opacity: 0.9;
+    }
+
+    input {
       margin-top: 6px;
       padding: 10px;
-      border-radius: 14px;
+      border-radius: 12px;
       border: none;
-      font-size: 14px;
-      background: #f5f3f7;
-      color: #2b243a;
+      font-size: 1em;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     button {
-      margin-top: 14px;
-      width: 100%;
+      margin-top: 20px;
       padding: 14px;
-      font-size: 16px;
-      border-radius: 22px;
+      width: 100%;
+      font-size: 1.1em;
+      border-radius: 999px;
       border: none;
+      background: linear-gradient(135deg, #ffd1ff, #c9f0ff);
+      color: #2b1055;
       cursor: pointer;
-      background: linear-gradient(135deg, #e6c9ff, #f7e7ff);
-      color: #2b243a;
       font-weight: 600;
     }
 
-    .message { margin-top: 16px; font-size: 15px; }
-    .history { margin-top: 16px; font-size: 13px; max-height: 90px; overflow-y: auto; opacity: 0.85; }
+    #resultIcon {
+      font-size: 64px;
+      margin-top: 16px;
+    }
+
+    #message {
+      margin-top: 12px;
+      font-size: 1.1em;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding: 8px 4px;
+    }
+
+    th {
+      font-weight: 600;
+      opacity: 0.85;
+    }
+
+    .success { color: lightgreen; }
+    .fail { color: salmon; }
+
+    /* Splash screen */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #1f0c3a, #4a6cc3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      z-index: 10;
+    }
   </style>
 </head>
 <body>
 
-<div class="splash" id="splash">
-  <h1>שעת האפס 🌙</h1>
-  <p>הרגע שבו היום נגמר</p>
-</div>
+<div id="splash">שעת האפס 🌙</div>
 
-<div class="app" id="app">
+<div class="card" id="app" style="display:none;">
   <h1>שעת האפס 🌙</h1>
-  <div class="time" id="clock">--:--</div>
 
-  <label>מתי בא לך ללכת לישון?</label>
+  <label>איך נקרא לך?</label>
+  <input type="text" id="username" placeholder="שם" />
+
+  <label>שעת שינה רצויה</label>
   <input type="time" id="sleepTime" />
 
-  <button onclick="saveSleepTime()">💾 שמירת שעת שינה</button>
-  <button onclick="goToSleep()">🌙 לילה טוב!!!</button>
+  <button onclick="goToSleep()">לילה טוב!!!</button>
 
-  <div class="message" id="message"></div>
-  <div class="history" id="history"></div>
+  <div id="resultIcon"></div>
+  <div id="message"></div>
+
+  <h2 style="margin-top:24px; font-size:1.2em;">מעקב שבועי</h2>
+  <table id="weeklyTable">
+    <thead>
+      <tr>
+        <th>יום</th>
+        <th>תוצאה</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 
 <script>
   const messages = [
-    "בחירה רכה וטובה 💙",
-    "זה רגע יפה לעצור בו",
-    "גם מנוחה היא התקדמות",
-    "מחר את תודה לעצמך 🌙"
+    "לילה טוב 🌙",
+    "עשית משהו טוב לעצמך",
+    "גם מחר זה יום חדש",
+    "גאה בך",
+    "מנוחה זה כוח"
   ];
 
-  function updateClock() {
-    const now = new Date();
-    document.getElementById('clock').innerText = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-  }
-  setInterval(updateClock, 1000); updateClock();
+  const days = ["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
 
-  function saveSleepTime() {
-    const time = document.getElementById('sleepTime').value;
-    localStorage.setItem('sleepTime', time);
-    document.getElementById('message').innerText = 'שעת האפס נשמרה 🌙';
+  function getUserKey(name) {
+    return "sleepData_" + name;
+  }
+
+  function loadWeeklyTable(name) {
+    const tbody = document.querySelector("#weeklyTable tbody");
+    tbody.innerHTML = "";
+
+    const data = JSON.parse(localStorage.getItem(getUserKey(name)) || "[]");
+
+    const last7 = data.slice(0,7).reverse();
+
+    last7.forEach(entry => {
+      const d = new Date(entry.date);
+      const tr = document.createElement("tr");
+      const dayTd = document.createElement("td");
+      dayTd.textContent = days[d.getDay()];
+      const resTd = document.createElement("td");
+      resTd.textContent = entry.success ? "✔️" : "❌";
+      resTd.className = entry.success ? "success" : "fail";
+      tr.appendChild(dayTd);
+      tr.appendChild(resTd);
+      tbody.appendChild(tr);
+    });
   }
 
   function goToSleep() {
-    const today = new Date().toDateString();
-    let streak = JSON.parse(localStorage.getItem('streak') || '{}');
+    const name = document.getElementById("username").value.trim();
+    const sleepTime = document.getElementById("sleepTime").value;
+    if (!name || !sleepTime) return;
 
-    if (streak.last === today) return;
+    const now = new Date();
+    const [h, m] = sleepTime.split(":");
+    const target = new Date();
+    target.setHours(h, m, 0, 0);
 
-    const yesterday = new Date(Date.now() - 86400000).toDateString();
-    streak.count = streak.last === yesterday ? (streak.count || 1) + 1 : 1;
-    streak.last = today;
+    const success = now <= target;
 
-    localStorage.setItem('streak', JSON.stringify(streak));
+    const icon = document.getElementById("resultIcon");
+    icon.textContent = success ? "✔️" : "❌";
+    icon.className = success ? "success" : "fail";
 
-    let msg = messages[Math.floor(Math.random() * messages.length)];
-    if (streak.count === 5) {
-      msg = '✨ 5 לילות ברצף! זה מדהים. ✨';
-    }
+    document.getElementById("message").textContent =
+      messages[Math.floor(Math.random() * messages.length)];
 
-    document.getElementById('message').innerText = msg;
-    renderHistory();
+    const key = getUserKey(name);
+    const data = JSON.parse(localStorage.getItem(key) || "[]");
+    data.unshift({ date: now.toISOString(), success });
+    localStorage.setItem(key, JSON.stringify(data));
+
+    loadWeeklyTable(name);
   }
 
-  function renderHistory() {
-    const history = JSON.parse(localStorage.getItem('history') || '[]');
-    history.unshift(new Date().toLocaleString('he-IL'));
-    localStorage.setItem('history', JSON.stringify(history.slice(0,10)));
-    document.getElementById('history').innerHTML = history.map(h => '🌙 ' + h).join('<br>');
-  }
-
+  // Splash handling
   setTimeout(() => {
-    document.getElementById('splash').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-  }, 3000);
+    document.getElementById("splash").style.display = "none";
+    document.getElementById("app").style.display = "block";
+  }, 2000);
 </script>
+
 </body>
 </html>
+
 

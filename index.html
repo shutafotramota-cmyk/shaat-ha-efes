@@ -175,3 +175,68 @@
 
 </body>
 </html>
+
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>שעת האפס 🌙</title>
+<style>
+body{margin:0;font-family:system-ui,sans-serif;min-height:100vh;overflow:hidden;background:linear-gradient(180deg,#05010f,#2b1055);color:white;display:flex;align-items:center;justify-content:center}
+.stars,.stars2{position:fixed;inset:0;background:transparent url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><circle cx="20" cy="20" r="1" fill="white"/><circle cx="120" cy="80" r="1" fill="white"/><circle cx="180" cy="150" r="1" fill="white"/></svg>') repeat;animation:moveStars 120s linear infinite;opacity:.6}
+.stars2{animation-duration:240s;opacity:.3}
+@keyframes moveStars{from{background-position:0 0}to{background-position:-1000px 1000px}}
+.moon{position:fixed;top:40px;left:40px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,#ddd 60%,#bbb);box-shadow:0 0 40px rgba(255,255,255,.4);animation:floatMoon 6s ease-in-out infinite}
+@keyframes floatMoon{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.fog{position:fixed;inset:0;background:radial-gradient(circle at 50% 70%,rgba(255,255,255,.08),transparent 60%);animation:fogMove 20s ease-in-out infinite}
+@keyframes fogMove{0%,100%{opacity:.3}50%{opacity:.6}}
+.card{position:relative;z-index:5;background:rgba(255,255,255,.15);backdrop-filter:blur(14px);border-radius:30px;padding:28px;width:100%;max-width:420px;box-shadow:0 20px 45px rgba(0,0,0,.4);text-align:center;animation:fadeIn 1s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+button{margin-top:16px;padding:16px;width:100%;font-size:1.15em;border-radius:999px;border:none;background:linear-gradient(135deg,#ffe0f7,#d5f3ff);color:#2b1055;cursor:pointer;font-weight:700}
+#resultIcon{font-size:72px;margin-top:10px}
+.success{color:#a6ffbe}.fail{color:#ffb3b3}
+#gift{display:none;font-size:80px;animation:pop 1s ease}
+@keyframes pop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+<div class="stars"></div><div class="stars2"></div><div class="fog"></div><div class="moon"></div>
+<div class="card">
+<h1>שעת האפס 🌙</h1>
+<input id="username" placeholder="איך נקרא לך?" />
+<input type="time" id="sleepTime" style="margin-top:10px" />
+<button onclick="goToSleep()">🌙 לילה טוב!!!</button>
+<div id="resultIcon"></div>
+<div id="summary"></div>
+<div id="gift">🎁✨</div>
+<button onclick="toggleMusic()">🎵 מוזיקה</button>
+</div>
+<audio id="bgm" loop><source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9d1c7c9c44.mp3" type="audio/mpeg"></audio>
+<script>
+const successMessages=['איזו בחירה טובה לעצמך 🌙','גם מחר תחסכי לעצמך קפה ☕','כל הכבוד על ההתמדה 💙'];
+const failMessages=['לא נורא 💙 מחר יום חדש','גם זה חלק מהדרך 🌱'];
+function key(name){return 'sleep_'+name}
+function goToSleep(){
+ const name=document.getElementById('username').value.trim();
+ const time=document.getElementById('sleepTime').value;
+ if(!name||!time)return;
+ const now=new Date();
+ const[h,m]=time.split(':').map(Number);
+ let target=new Date(now);target.setHours(h,m,0,0);
+ if(h<12&&now.getHours()>=12)target.setDate(target.getDate()+1);
+ const success=now<=target;
+ document.getElementById('resultIcon').textContent=success?'✔️😊':'❌😴';
+ document.getElementById('resultIcon').className=success?'success':'fail';
+ const data=JSON.parse(localStorage.getItem(key(name))||'[]');
+ data.unshift({date:now.toISOString(),success});
+ localStorage.setItem(key(name),JSON.stringify(data));
+ const msg=(success?successMessages:failMessages)[Math.floor(Math.random()*2)];
+ document.getElementById('summary').innerHTML=msg;
+ const streak=data.filter(d=>d.success).length;
+ if(streak>=5){document.getElementById('gift').style.display='block';}
+}
+function toggleMusic(){const a=document.getElementById('bgm');a.paused?a.play():a.pause()}
+</script>
+</body>
+</html>

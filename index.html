@@ -19,19 +19,19 @@
     }
 
     .card {
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(12px);
-      border-radius: 28px;
-      padding: 26px;
+      background: rgba(255,255,255,0.16);
+      backdrop-filter: blur(14px);
+      border-radius: 30px;
+      padding: 28px;
       width: 100%;
       max-width: 420px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      box-shadow: 0 20px 45px rgba(0,0,0,0.35);
       text-align: center;
-      animation: fadeIn 0.8s ease;
+      animation: fadeIn 0.9s ease;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(25px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -42,46 +42,55 @@
     input, select {
       margin-top: 6px;
       padding: 10px;
-      border-radius: 14px;
+      border-radius: 16px;
       border: none;
       font-size: 1em;
       width: 100%;
     }
 
     button {
-      margin-top: 18px;
-      padding: 14px;
+      margin-top: 20px;
+      padding: 16px;
       width: 100%;
-      font-size: 1.1em;
+      font-size: 1.15em;
       border-radius: 999px;
       border: none;
-      background: linear-gradient(135deg, #ffd6f6, #c9f0ff);
+      background: linear-gradient(135deg, #ffe0f7, #d5f3ff);
       color: #2b1055;
       cursor: pointer;
       font-weight: 700;
-      transition: transform 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    button:active { transform: scale(0.96); }
+    button:active {
+      transform: scale(0.95);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
 
     #resultIcon {
-      font-size: 72px;
-      margin-top: 10px;
-      animation: pop 0.4s ease;
+      font-size: 76px;
+      margin-top: 12px;
+      animation: pop 0.45s ease;
     }
 
     @keyframes pop {
-      0% { transform: scale(0.5); opacity: 0; }
+      0% { transform: scale(0.4); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
     }
 
-    .success { color: #9dffb0; }
-    .fail { color: #ff9d9d; }
+    .success { color: #a6ffbe; }
+    .fail { color: #ffb3b3; }
 
-    table { width:100%; margin-top:14px; border-collapse:collapse; font-size:13px; }
+    table { width:100%; margin-top:16px; border-collapse:collapse; font-size:13px; }
     th, td { padding:6px; border-bottom:1px solid rgba(255,255,255,0.25); }
 
-    #summary { margin-top: 12px; font-size: 15px; line-height:1.4; }
+    #summary { margin-top: 14px; font-size: 15px; line-height:1.5; }
+
+    .rare {
+      margin-top: 10px;
+      font-size: 14px;
+      animation: fadeIn 0.8s ease;
+    }
 
     #splash {
       position: fixed;
@@ -90,9 +99,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.2em;
+      font-size: 2.3em;
       z-index: 10;
-      animation: fadeIn 1s ease;
+      animation: fadeIn 1.2s ease;
     }
   </style>
 </head>
@@ -120,6 +129,7 @@
 
   <div id="resultIcon"></div>
   <div id="summary"></div>
+  <div class="rare" id="rare"></div>
 
   <table>
     <thead><tr><th>יום</th><th>✔ / ❌</th></tr></thead>
@@ -134,11 +144,24 @@
     rose: ['#42275a', '#734b6d']
   };
 
-  const encouragements = [
+  const successMessages = [
     'גם מחר תחסכי לעצמך כמה כוסות קפה ☕😉',
     ':)',
     'איזו בחירה טובה לעצמך 🌙',
     'הגוף שלך יודה לך מחר 💙'
+  ];
+
+  const failMessages = [
+    'לא נורא 💙 טוב שיש גם את מחר לנסות',
+    'גם זה חלק מתהליך 🌱',
+    'היית עדינה עם עצמך — זה נחשב',
+    'מחר לילה חדש 🌙'
+  ];
+
+  const rareSurprises = [
+    '✨ הפתעה נדירה! מגיע לך חיבוק לפני השינה ✨',
+    '🌟 רגע קטן של גאווה — את מתמידה 🌟',
+    '💤 שעת האפס ראתה אותך 💙'
   ];
 
   const days = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
@@ -188,7 +211,7 @@
     localStorage.setItem(key, JSON.stringify(data));
 
     renderWeekly(data);
-    renderSummary(data);
+    renderSummary(data, success);
   }
 
   function renderWeekly(data) {
@@ -211,7 +234,7 @@
     });
   }
 
-  function renderSummary(data) {
+  function renderSummary(data, success) {
     const last7 = data.slice(0,7);
     const successCount = last7.filter(d => d.success).length;
 
@@ -221,18 +244,25 @@
       else break;
     }
 
-    const msg = encouragements[Math.floor(Math.random()*encouragements.length)];
+    const msgs = success ? successMessages : failMessages;
+    const msg = msgs[Math.floor(Math.random()*msgs.length)];
 
     let text = `השבוע: ${successCount} מתוך ${last7.length} בזמן 💙<br>${msg}`;
     if (streak >= 5) text += '<br>✨ 5 לילות ברצף! איזה הישג ✨';
 
     document.getElementById('summary').innerHTML = text;
+
+    const rare = document.getElementById('rare');
+    rare.innerHTML = '';
+    if (Math.random() < 0.15) {
+      rare.textContent = rareSurprises[Math.floor(Math.random()*rareSurprises.length)];
+    }
   }
 
   setTimeout(() => {
     document.getElementById('splash').style.display = 'none';
     document.getElementById('app').style.display = 'block';
-  }, 2000);
+  }, 2200);
 </script>
 
 </body>

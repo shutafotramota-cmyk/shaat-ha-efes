@@ -1,226 +1,97 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>שעת האפס 🌙</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: system-ui, sans-serif;
-      min-height: 100vh;
-      overflow: hidden;
-      background: linear-gradient(180deg, #05010f, #2b1055);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* 🌌 רקע כוכבים */
-    .stars, .stars2 {
-      position: fixed;
-      inset: 0;
-      background: transparent url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><circle cx="10" cy="10" r="1" fill="white"/><circle cx="100" cy="40" r="1" fill="white"/><circle cx="160" cy="120" r="1" fill="white"/></svg>') repeat;
-      animation: moveStars 120s linear infinite;
-      opacity: 0.6;
-    }
-
-    .stars2 {
-      animation-duration: 240s;
-      opacity: 0.3;
-    }
-
-    @keyframes moveStars {
-      from { background-position: 0 0; }
-      to { background-position: -1000px 1000px; }
-    }
-
-    /* 🌕 ירח */
-    .moon {
-      position: fixed;
-      top: 40px;
-      left: 40px;
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #fff, #ddd 60%, #bbb);
-      box-shadow: 0 0 40px rgba(255,255,255,0.4);
-      animation: floatMoon 6s ease-in-out infinite;
-    }
-
-    @keyframes floatMoon {
-      0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    /* עיגולים נמוגים */
-    .bubble {
-      position: fixed;
-      bottom: -100px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 50%;
-      animation: rise 30s infinite ease-in;
-    }
-
-    @keyframes rise {
-      from { transform: translateY(0) scale(0.8); opacity: 0; }
-      to { transform: translateY(-120vh) scale(1.2); opacity: 1; }
-    }
-
-    .card {
-      position: relative;
-      z-index: 5;
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(14px);
-      border-radius: 30px;
-      padding: 28px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 20px 45px rgba(0,0,0,0.4);
-      text-align: center;
-      animation: fadeIn 1s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    button {
-      margin-top: 20px;
-      padding: 16px;
-      width: 100%;
-      font-size: 1.15em;
-      border-radius: 999px;
-      border: none;
-      background: linear-gradient(135deg, #ffe0f7, #d5f3ff);
-      color: #2b1055;
-      cursor: pointer;
-      font-weight: 700;
-    }
-
-    #resultIcon { font-size: 72px; margin-top: 10px; }
-    .success { color: #a6ffbe; }
-    .fail { color: #ffb3b3; }
-
-    #musicToggle {
-      margin-top: 14px;
-      font-size: 14px;
-      opacity: 0.85;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-
-<div class="stars"></div>
-<div class="stars2"></div>
-<div class="moon"></div>
-
-<div class="bubble" style="left:10%; width:60px; height:60px; animation-duration:40s"></div>
-<div class="bubble" style="left:40%; width:100px; height:100px; animation-duration:55s"></div>
-<div class="bubble" style="left:70%; width:80px; height:80px; animation-duration:45s"></div>
-
-<div class="card">
-  <h1>שעת האפס 🌙</h1>
-  <input id="username" placeholder="איך נקרא לך?" />
-  <input type="time" id="sleepTime" style="margin-top:10px" />
-  <button onclick="goToSleep()">🌙 לילה טוב!!!</button>
-  <div id="resultIcon"></div>
-  <div id="summary"></div>
-  <div id="musicToggle" onclick="toggleMusic()">🎵 מוזיקה רגועה</div>
-</div>
-
-<audio id="bgm" loop>
-  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9d1c7c9c44.mp3" type="audio/mpeg">
-</audio>
-
-<script>
-  const successMessages = [
-    'גם מחר תחסכי לעצמך כמה כוסות קפה ☕😉',
-    ':)',
-    'איזו בחירה טובה לעצמך 🌙'
-  ];
-
-  const failMessages = [
-    'לא נורא 💙 טוב שיש גם את מחר לנסות',
-    'גם זה חלק מתהליך 🌱'
-  ];
-
-  function goToSleep() {
-    const time = document.getElementById('sleepTime').value;
-    if (!time) return;
-
-    const now = new Date();
-    const [h,m] = time.split(':').map(Number);
-    let target = new Date(now);
-    target.setHours(h,m,0,0);
-    if (h < 12 && now.getHours() >= 12) target.setDate(target.getDate()+1);
-
-    const success = now <= target;
-    const icon = document.getElementById('resultIcon');
-    icon.textContent = success ? '✔️😊' : '❌😴';
-    icon.className = success ? 'success' : 'fail';
-
-    const msg = (success ? successMessages : failMessages)[Math.floor(Math.random()*2)];
-    document.getElementById('summary').innerHTML = msg;
-  }
-
-  function toggleMusic() {
-    const audio = document.getElementById('bgm');
-    if (audio.paused) audio.play(); else audio.pause();
-  }
-</script>
-
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>שעת האפס 🌙</title>
 <style>
-body{margin:0;font-family:system-ui,sans-serif;min-height:100vh;overflow:hidden;background:linear-gradient(180deg,#05010f,#2b1055);color:white;display:flex;align-items:center;justify-content:center}
+:root{--bg1:#05010f;--bg2:#2b1055;--card:rgba(255,255,255,.15)}
+body{margin:0;font-family:system-ui,sans-serif;min-height:100vh;overflow:hidden;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:white;display:flex;align-items:center;justify-content:center}
+.hidden{display:none}
 .stars,.stars2{position:fixed;inset:0;background:transparent url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><circle cx="20" cy="20" r="1" fill="white"/><circle cx="120" cy="80" r="1" fill="white"/><circle cx="180" cy="150" r="1" fill="white"/></svg>') repeat;animation:moveStars 120s linear infinite;opacity:.6}
 .stars2{animation-duration:240s;opacity:.3}
 @keyframes moveStars{from{background-position:0 0}to{background-position:-1000px 1000px}}
 .moon{position:fixed;top:40px;left:40px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,#ddd 60%,#bbb);box-shadow:0 0 40px rgba(255,255,255,.4);animation:floatMoon 6s ease-in-out infinite}
 @keyframes floatMoon{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-.fog{position:fixed;inset:0;background:radial-gradient(circle at 50% 70%,rgba(255,255,255,.08),transparent 60%);animation:fogMove 20s ease-in-out infinite}
-@keyframes fogMove{0%,100%{opacity:.3}50%{opacity:.6}}
-.card{position:relative;z-index:5;background:rgba(255,255,255,.15);backdrop-filter:blur(14px);border-radius:30px;padding:28px;width:100%;max-width:420px;box-shadow:0 20px 45px rgba(0,0,0,.4);text-align:center;animation:fadeIn 1s ease}
+.card{position:relative;z-index:5;background:var(--card);backdrop-filter:blur(14px);border-radius:30px;padding:26px;width:100%;max-width:460px;box-shadow:0 20px 45px rgba(0,0,0,.4);text-align:center;animation:fadeIn 1s ease;max-height:92vh;overflow:auto}
 @keyframes fadeIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-button{margin-top:16px;padding:16px;width:100%;font-size:1.15em;border-radius:999px;border:none;background:linear-gradient(135deg,#ffe0f7,#d5f3ff);color:#2b1055;cursor:pointer;font-weight:700}
-#resultIcon{font-size:72px;margin-top:10px}
+input,button,select{margin-top:10px;padding:12px;width:100%;font-size:1em;border-radius:999px;border:none}
+button{background:linear-gradient(135deg,#ffe0f7,#d5f3ff);color:#2b1055;font-weight:700;cursor:pointer}
+#resultIcon{font-size:64px;margin-top:10px}
 .success{color:#a6ffbe}.fail{color:#ffb3b3}
-#gift{display:none;font-size:80px;animation:pop 1s ease}
-@keyframes pop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+#gift{display:none;font-size:80px}
+.explode{animation:explode 1s ease}
+@keyframes explode{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.4)}100%{transform:scale(1);opacity:1}}
+.table{margin-top:14px;border-collapse:collapse;width:100%;font-size:.9em}
+.table td{border:1px solid rgba(255,255,255,.25);padding:6px}
 </style>
 </head>
 <body>
-<div class="stars"></div><div class="stars2"></div><div class="fog"></div><div class="moon"></div>
-<div class="card">
+<div class="stars"></div><div class="stars2"></div><div class="moon"></div>
+
+<!-- מסך פתיחה -->
+<div class="card" id="welcome">
 <h1>שעת האפס 🌙</h1>
-<input id="username" placeholder="איך נקרא לך?" />
-<input type="time" id="sleepTime" style="margin-top:10px" />
+<p>ברוכה הבאה</p>
+<input id="usernameInput" placeholder="שם משתמש" />
+<select id="themeSelect">
+<option value="night">לילה סגול</option>
+<option value="warm">חמים ורך</option>
+<option value="blue">כחול רגוע</option>
+</select>
+<button onclick="enterApp()">כניסה</button>
+</div>
+
+<!-- האפליקציה -->
+<div class="card hidden" id="app">
+<h1 id="hello"></h1>
+<input type="time" id="sleepTime" />
 <button onclick="goToSleep()">🌙 לילה טוב!!!</button>
 <div id="resultIcon"></div>
 <div id="summary"></div>
 <div id="gift">🎁✨</div>
+<h3>מעקב שבועי</h3>
+<table class="table"><tr id="weekRow"></tr></table>
 <button onclick="toggleMusic()">🎵 מוזיקה</button>
 </div>
+
 <audio id="bgm" loop><source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9d1c7c9c44.mp3" type="audio/mpeg"></audio>
+
 <script>
-const successMessages=['איזו בחירה טובה לעצמך 🌙','גם מחר תחסכי לעצמך קפה ☕','כל הכבוד על ההתמדה 💙'];
-const failMessages=['לא נורא 💙 מחר יום חדש','גם זה חלק מהדרך 🌱'];
-function key(name){return 'sleep_'+name}
+const days=['א','ב','ג','ד','ה','ו','ש'];
+const successMessages=['איזו בחירה טובה לעצמך 🌙','גם מחר תחסכי לעצמך כמה כוסות קפה ☕','כל הכבוד על ההתמדה 💙'];
+const failMessages=['לא נורא 💙 מחר יום חדש','זה בסדר, מנסים שוב מחר 🌱'];
+let currentUser='';
+function ukey(k){return currentUser+'_'+k}
+
+// כניסה + טעינת הגדרות
+function enterApp(){
+ currentUser=document.getElementById('usernameInput').value.trim();
+ if(!currentUser)return;
+ localStorage.setItem('lastUser',currentUser);
+ applyTheme(document.getElementById('themeSelect').value);
+ document.getElementById('welcome').classList.add('hidden');
+ document.getElementById('app').classList.remove('hidden');
+ document.getElementById('hello').textContent='לילה טוב, '+currentUser+' 💙';
+ renderWeek(JSON.parse(localStorage.getItem(ukey('history'))||'[]'));
+ if(localStorage.getItem(ukey('music'))==='on')document.getElementById('bgm').play();
+}
+
+// ערכת צבעים
+function applyTheme(t){
+ const r=document.documentElement.style;
+ if(t==='warm'){r.setProperty('--bg1','#2b1b0f');r.setProperty('--bg2','#5c3b1e');}
+ if(t==='blue'){r.setProperty('--bg1','#061826');r.setProperty('--bg2','#123b5d');}
+ if(t==='night'){r.setProperty('--bg1','#05010f');r.setProperty('--bg2','#2b1055');}
+ localStorage.setItem(ukey('theme'),t);
+}
+
+// מעקב שבועי
+function renderWeek(data){const row=document.getElementById('weekRow');row.innerHTML='';days.forEach((d,i)=>{const td=document.createElement('td');const rec=data.find(x=>new Date(x.date).getDay()===i);td.textContent=rec?rec.success?'✔️':'❌':'–';row.appendChild(td);});}
+
 function goToSleep(){
- const name=document.getElementById('username').value.trim();
  const time=document.getElementById('sleepTime').value;
- if(!name||!time)return;
+ if(!time)return;
  const now=new Date();
  const[h,m]=time.split(':').map(Number);
  let target=new Date(now);target.setHours(h,m,0,0);
@@ -228,15 +99,20 @@ function goToSleep(){
  const success=now<=target;
  document.getElementById('resultIcon').textContent=success?'✔️😊':'❌😴';
  document.getElementById('resultIcon').className=success?'success':'fail';
- const data=JSON.parse(localStorage.getItem(key(name))||'[]');
+ const data=JSON.parse(localStorage.getItem(ukey('history'))||'[]');
  data.unshift({date:now.toISOString(),success});
- localStorage.setItem(key(name),JSON.stringify(data));
- const msg=(success?successMessages:failMessages)[Math.floor(Math.random()*2)];
- document.getElementById('summary').innerHTML=msg;
- const streak=data.filter(d=>d.success).length;
- if(streak>=5){document.getElementById('gift').style.display='block';}
+ localStorage.setItem(ukey('history'),JSON.stringify(data));
+ document.getElementById('summary').textContent=(success?successMessages:failMessages)[Math.floor(Math.random()*2)];
+ renderWeek(data);
+ const streak=data.filter(d=>d.success).slice(0,5).length;
+ if(streak>=5){const g=document.getElementById('gift');g.style.display='block';g.classList.add('explode');}
 }
-function toggleMusic(){const a=document.getElementById('bgm');a.paused?a.play():a.pause()}
+
+// מוזיקה – חייבת פעולה של משתמש
+function toggleMusic(){const a=document.getElementById('bgm');if(a.paused){a.play();localStorage.setItem(ukey('music'),'on')}else{a.pause();localStorage.setItem(ukey('music'),'off')}}
+
+// כניסה אוטומטית למשתמש אחרון
+window.onload=()=>{const last=localStorage.getItem('lastUser');if(last){document.getElementById('usernameInput').value=last}}
 </script>
 </body>
 </html>

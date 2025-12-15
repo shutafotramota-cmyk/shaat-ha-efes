@@ -7,92 +7,82 @@
   <style>
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #2b1055, #7597de);
-      color: white;
+      font-family: system-ui, sans-serif;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      color: white;
+      --bg1: #2b1055;
+      --bg2: #7597de;
     }
 
     .card {
-      background: rgba(255,255,255,0.12);
-      backdrop-filter: blur(10px);
-      border-radius: 24px;
-      padding: 24px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(12px);
+      border-radius: 28px;
+      padding: 26px;
       width: 100%;
       max-width: 420px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
       text-align: center;
+      animation: fadeIn 0.8s ease;
     }
 
-    h1 {
-      margin-top: 0;
-      font-size: 1.8em;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    label {
-      display: block;
-      margin-top: 16px;
-      font-size: 0.95em;
-      opacity: 0.9;
-    }
+    h1 { margin-top: 0; }
 
-    input {
+    label { display:block; margin-top:14px; font-size:14px; opacity:0.9; }
+
+    input, select {
       margin-top: 6px;
       padding: 10px;
-      border-radius: 12px;
+      border-radius: 14px;
       border: none;
       font-size: 1em;
       width: 100%;
-      box-sizing: border-box;
     }
 
     button {
-      margin-top: 20px;
+      margin-top: 18px;
       padding: 14px;
       width: 100%;
       font-size: 1.1em;
       border-radius: 999px;
       border: none;
-      background: linear-gradient(135deg, #ffd1ff, #c9f0ff);
+      background: linear-gradient(135deg, #ffd6f6, #c9f0ff);
       color: #2b1055;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 700;
+      transition: transform 0.2s ease;
     }
+
+    button:active { transform: scale(0.96); }
 
     #resultIcon {
-      font-size: 64px;
-      margin-top: 16px;
+      font-size: 72px;
+      margin-top: 10px;
+      animation: pop 0.4s ease;
     }
 
-    #message {
-      margin-top: 12px;
-      font-size: 1.1em;
+    @keyframes pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
     }
 
-    table {
-      width: 100%;
-      margin-top: 20px;
-      border-collapse: collapse;
-      font-size: 0.9em;
-    }
+    .success { color: #9dffb0; }
+    .fail { color: #ff9d9d; }
 
-    th, td {
-      border-bottom: 1px solid rgba(255,255,255,0.2);
-      padding: 8px 4px;
-    }
+    table { width:100%; margin-top:14px; border-collapse:collapse; font-size:13px; }
+    th, td { padding:6px; border-bottom:1px solid rgba(255,255,255,0.25); }
 
-    th {
-      font-weight: 600;
-      opacity: 0.85;
-    }
+    #summary { margin-top: 12px; font-size: 15px; line-height:1.4; }
 
-    .success { color: lightgreen; }
-    .fail { color: salmon; }
-
-    /* Splash screen */
     #splash {
       position: fixed;
       inset: 0;
@@ -100,8 +90,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2em;
+      font-size: 2.2em;
       z-index: 10;
+      animation: fadeIn 1s ease;
     }
   </style>
 </head>
@@ -113,100 +104,136 @@
   <h1>שעת האפס 🌙</h1>
 
   <label>איך נקרא לך?</label>
-  <input type="text" id="username" placeholder="שם" />
+  <input id="username" placeholder="שם" />
 
   <label>שעת שינה רצויה</label>
   <input type="time" id="sleepTime" />
 
-  <button onclick="goToSleep()">לילה טוב!!!</button>
+  <label>בחירת צבע</label>
+  <select id="theme" onchange="changeTheme()">
+    <option value="purple">סגול לילי 💜</option>
+    <option value="blue">כחול שקט 💙</option>
+    <option value="rose">ורוד חמים 🌸</option>
+  </select>
+
+  <button onclick="goToSleep()">🌙 לילה טוב!!!</button>
 
   <div id="resultIcon"></div>
-  <div id="message"></div>
+  <div id="summary"></div>
 
-  <h2 style="margin-top:24px; font-size:1.2em;">מעקב שבועי</h2>
-  <table id="weeklyTable">
-    <thead>
-      <tr>
-        <th>יום</th>
-        <th>תוצאה</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
+  <table>
+    <thead><tr><th>יום</th><th>✔ / ❌</th></tr></thead>
+    <tbody id="weekly"></tbody>
   </table>
 </div>
 
 <script>
-  const messages = [
-    "לילה טוב 🌙",
-    "עשית משהו טוב לעצמך",
-    "גם מחר זה יום חדש",
-    "גאה בך",
-    "מנוחה זה כוח"
+  const themes = {
+    purple: ['#2b1055', '#7597de'],
+    blue: ['#0f2027', '#2c5364'],
+    rose: ['#42275a', '#734b6d']
+  };
+
+  const encouragements = [
+    'גם מחר תחסכי לעצמך כמה כוסות קפה ☕😉',
+    ':)',
+    'איזו בחירה טובה לעצמך 🌙',
+    'הגוף שלך יודה לך מחר 💙'
   ];
 
-  const days = ["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
+  const days = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
 
-  function getUserKey(name) {
-    return "sleepData_" + name;
+  function userKey(name, suffix) {
+    return 'sleep_' + name + '_' + suffix;
   }
 
-  function loadWeeklyTable(name) {
-    const tbody = document.querySelector("#weeklyTable tbody");
-    tbody.innerHTML = "";
+  function changeTheme() {
+    const name = document.getElementById('username').value.trim();
+    const t = document.getElementById('theme').value;
+    document.body.style.setProperty('--bg1', themes[t][0]);
+    document.body.style.setProperty('--bg2', themes[t][1]);
+    if (name) localStorage.setItem(userKey(name,'theme'), t);
+  }
 
-    const data = JSON.parse(localStorage.getItem(getUserKey(name)) || "[]");
+  function goToSleep() {
+    const name = document.getElementById('username').value.trim();
+    const time = document.getElementById('sleepTime').value;
+    if (!name || !time) return;
 
-    const last7 = data.slice(0,7).reverse();
+    localStorage.setItem(userKey(name,'sleepTime'), time);
 
-    last7.forEach(entry => {
-      const d = new Date(entry.date);
-      const tr = document.createElement("tr");
-      const dayTd = document.createElement("td");
-      dayTd.textContent = days[d.getDay()];
-      const resTd = document.createElement("td");
-      resTd.textContent = entry.success ? "✔️" : "❌";
-      resTd.className = entry.success ? "success" : "fail";
-      tr.appendChild(dayTd);
-      tr.appendChild(resTd);
+    const now = new Date();
+    const [h,m] = time.split(':').map(Number);
+    let target = new Date(now);
+    target.setHours(h, m, 0, 0);
+
+    if (h < 12 && now.getHours() >= 12) {
+      target.setDate(target.getDate() + 1);
+    }
+
+    const success = now <= target;
+
+    const icon = document.getElementById('resultIcon');
+    icon.textContent = success ? '✔️😊' : '❌😴';
+    icon.className = success ? 'success' : 'fail';
+
+    const key = userKey(name,'history');
+    const data = JSON.parse(localStorage.getItem(key) || '[]');
+    const today = new Date().toDateString();
+
+    if (!data.some(d => new Date(d.date).toDateString() === today)) {
+      data.unshift({ date: now.toISOString(), success });
+    }
+
+    localStorage.setItem(key, JSON.stringify(data));
+
+    renderWeekly(data);
+    renderSummary(data);
+  }
+
+  function renderWeekly(data) {
+    const tbody = document.getElementById('weekly');
+    tbody.innerHTML = '';
+
+    data.slice(0,7).reverse().forEach(d => {
+      const tr = document.createElement('tr');
+      const day = document.createElement('td');
+      const res = document.createElement('td');
+      const date = new Date(d.date);
+
+      day.textContent = days[date.getDay()];
+      res.textContent = d.success ? '✔️' : '❌';
+      res.className = d.success ? 'success' : 'fail';
+
+      tr.appendChild(day);
+      tr.appendChild(res);
       tbody.appendChild(tr);
     });
   }
 
-  function goToSleep() {
-    const name = document.getElementById("username").value.trim();
-    const sleepTime = document.getElementById("sleepTime").value;
-    if (!name || !sleepTime) return;
+  function renderSummary(data) {
+    const last7 = data.slice(0,7);
+    const successCount = last7.filter(d => d.success).length;
 
-    const now = new Date();
-    const [h, m] = sleepTime.split(":");
-    const target = new Date();
-    target.setHours(h, m, 0, 0);
+    let streak = 0;
+    for (let i = 0; i < last7.length; i++) {
+      if (last7[i].success) streak++;
+      else break;
+    }
 
-    const success = now <= target;
+    const msg = encouragements[Math.floor(Math.random()*encouragements.length)];
 
-    const icon = document.getElementById("resultIcon");
-    icon.textContent = success ? "✔️" : "❌";
-    icon.className = success ? "success" : "fail";
+    let text = `השבוע: ${successCount} מתוך ${last7.length} בזמן 💙<br>${msg}`;
+    if (streak >= 5) text += '<br>✨ 5 לילות ברצף! איזה הישג ✨';
 
-    document.getElementById("message").textContent =
-      messages[Math.floor(Math.random() * messages.length)];
-
-    const key = getUserKey(name);
-    const data = JSON.parse(localStorage.getItem(key) || "[]");
-    data.unshift({ date: now.toISOString(), success });
-    localStorage.setItem(key, JSON.stringify(data));
-
-    loadWeeklyTable(name);
+    document.getElementById('summary').innerHTML = text;
   }
 
-  // Splash handling
   setTimeout(() => {
-    document.getElementById("splash").style.display = "none";
-    document.getElementById("app").style.display = "block";
+    document.getElementById('splash').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
   }, 2000);
 </script>
 
 </body>
 </html>
-
-

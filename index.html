@@ -9,43 +9,82 @@
       margin: 0;
       font-family: system-ui, sans-serif;
       min-height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(180deg, #05010f, #2b1055);
+      color: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, var(--bg1), var(--bg2));
-      color: white;
-      --bg1: #2b1055;
-      --bg2: #7597de;
+    }
+
+    /* 🌌 רקע כוכבים */
+    .stars, .stars2 {
+      position: fixed;
+      inset: 0;
+      background: transparent url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><circle cx="10" cy="10" r="1" fill="white"/><circle cx="100" cy="40" r="1" fill="white"/><circle cx="160" cy="120" r="1" fill="white"/></svg>') repeat;
+      animation: moveStars 120s linear infinite;
+      opacity: 0.6;
+    }
+
+    .stars2 {
+      animation-duration: 240s;
+      opacity: 0.3;
+    }
+
+    @keyframes moveStars {
+      from { background-position: 0 0; }
+      to { background-position: -1000px 1000px; }
+    }
+
+    /* 🌕 ירח */
+    .moon {
+      position: fixed;
+      top: 40px;
+      left: 40px;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #fff, #ddd 60%, #bbb);
+      box-shadow: 0 0 40px rgba(255,255,255,0.4);
+      animation: floatMoon 6s ease-in-out infinite;
+    }
+
+    @keyframes floatMoon {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* עיגולים נמוגים */
+    .bubble {
+      position: fixed;
+      bottom: -100px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 50%;
+      animation: rise 30s infinite ease-in;
+    }
+
+    @keyframes rise {
+      from { transform: translateY(0) scale(0.8); opacity: 0; }
+      to { transform: translateY(-120vh) scale(1.2); opacity: 1; }
     }
 
     .card {
-      background: rgba(255,255,255,0.16);
+      position: relative;
+      z-index: 5;
+      background: rgba(255,255,255,0.15);
       backdrop-filter: blur(14px);
       border-radius: 30px;
       padding: 28px;
       width: 100%;
       max-width: 420px;
-      box-shadow: 0 20px 45px rgba(0,0,0,0.35);
+      box-shadow: 0 20px 45px rgba(0,0,0,0.4);
       text-align: center;
-      animation: fadeIn 0.9s ease;
+      animation: fadeIn 1s ease;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(25px); }
+      from { opacity: 0; transform: translateY(30px); }
       to { opacity: 1; transform: translateY(0); }
-    }
-
-    h1 { margin-top: 0; }
-
-    label { display:block; margin-top:14px; font-size:14px; opacity:0.9; }
-
-    input, select {
-      margin-top: 6px;
-      padding: 10px;
-      border-radius: 16px;
-      border: none;
-      font-size: 1em;
-      width: 100%;
     }
 
     button {
@@ -59,210 +98,79 @@
       color: #2b1055;
       cursor: pointer;
       font-weight: 700;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    button:active {
-      transform: scale(0.95);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    }
-
-    #resultIcon {
-      font-size: 76px;
-      margin-top: 12px;
-      animation: pop 0.45s ease;
-    }
-
-    @keyframes pop {
-      0% { transform: scale(0.4); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
+    #resultIcon { font-size: 72px; margin-top: 10px; }
     .success { color: #a6ffbe; }
     .fail { color: #ffb3b3; }
 
-    table { width:100%; margin-top:16px; border-collapse:collapse; font-size:13px; }
-    th, td { padding:6px; border-bottom:1px solid rgba(255,255,255,0.25); }
-
-    #summary { margin-top: 14px; font-size: 15px; line-height:1.5; }
-
-    .rare {
-      margin-top: 10px;
+    #musicToggle {
+      margin-top: 14px;
       font-size: 14px;
-      animation: fadeIn 0.8s ease;
-    }
-
-    #splash {
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(135deg, #1f0c3a, #4a6cc3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.3em;
-      z-index: 10;
-      animation: fadeIn 1.2s ease;
+      opacity: 0.85;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-<div id="splash">שעת האפס 🌙</div>
+<div class="stars"></div>
+<div class="stars2"></div>
+<div class="moon"></div>
 
-<div class="card" id="app" style="display:none;">
+<div class="bubble" style="left:10%; width:60px; height:60px; animation-duration:40s"></div>
+<div class="bubble" style="left:40%; width:100px; height:100px; animation-duration:55s"></div>
+<div class="bubble" style="left:70%; width:80px; height:80px; animation-duration:45s"></div>
+
+<div class="card">
   <h1>שעת האפס 🌙</h1>
-
-  <label>איך נקרא לך?</label>
-  <input id="username" placeholder="שם" />
-
-  <label>שעת שינה רצויה</label>
-  <input type="time" id="sleepTime" />
-
-  <label>בחירת צבע</label>
-  <select id="theme" onchange="changeTheme()">
-    <option value="purple">סגול לילי 💜</option>
-    <option value="blue">כחול שקט 💙</option>
-    <option value="rose">ורוד חמים 🌸</option>
-  </select>
-
+  <input id="username" placeholder="איך נקרא לך?" />
+  <input type="time" id="sleepTime" style="margin-top:10px" />
   <button onclick="goToSleep()">🌙 לילה טוב!!!</button>
-
   <div id="resultIcon"></div>
   <div id="summary"></div>
-  <div class="rare" id="rare"></div>
-
-  <table>
-    <thead><tr><th>יום</th><th>✔ / ❌</th></tr></thead>
-    <tbody id="weekly"></tbody>
-  </table>
+  <div id="musicToggle" onclick="toggleMusic()">🎵 מוזיקה רגועה</div>
 </div>
 
-<script>
-  const themes = {
-    purple: ['#2b1055', '#7597de'],
-    blue: ['#0f2027', '#2c5364'],
-    rose: ['#42275a', '#734b6d']
-  };
+<audio id="bgm" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9d1c7c9c44.mp3" type="audio/mpeg">
+</audio>
 
+<script>
   const successMessages = [
     'גם מחר תחסכי לעצמך כמה כוסות קפה ☕😉',
     ':)',
-    'איזו בחירה טובה לעצמך 🌙',
-    'הגוף שלך יודה לך מחר 💙'
+    'איזו בחירה טובה לעצמך 🌙'
   ];
 
   const failMessages = [
     'לא נורא 💙 טוב שיש גם את מחר לנסות',
-    'גם זה חלק מתהליך 🌱',
-    'היית עדינה עם עצמך — זה נחשב',
-    'מחר לילה חדש 🌙'
+    'גם זה חלק מתהליך 🌱'
   ];
-
-  const rareSurprises = [
-    '✨ הפתעה נדירה! מגיע לך חיבוק לפני השינה ✨',
-    '🌟 רגע קטן של גאווה — את מתמידה 🌟',
-    '💤 שעת האפס ראתה אותך 💙'
-  ];
-
-  const days = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
-
-  function userKey(name, suffix) {
-    return 'sleep_' + name + '_' + suffix;
-  }
-
-  function changeTheme() {
-    const name = document.getElementById('username').value.trim();
-    const t = document.getElementById('theme').value;
-    document.body.style.setProperty('--bg1', themes[t][0]);
-    document.body.style.setProperty('--bg2', themes[t][1]);
-    if (name) localStorage.setItem(userKey(name,'theme'), t);
-  }
 
   function goToSleep() {
-    const name = document.getElementById('username').value.trim();
     const time = document.getElementById('sleepTime').value;
-    if (!name || !time) return;
-
-    localStorage.setItem(userKey(name,'sleepTime'), time);
+    if (!time) return;
 
     const now = new Date();
     const [h,m] = time.split(':').map(Number);
     let target = new Date(now);
-    target.setHours(h, m, 0, 0);
-
-    if (h < 12 && now.getHours() >= 12) {
-      target.setDate(target.getDate() + 1);
-    }
+    target.setHours(h,m,0,0);
+    if (h < 12 && now.getHours() >= 12) target.setDate(target.getDate()+1);
 
     const success = now <= target;
-
     const icon = document.getElementById('resultIcon');
     icon.textContent = success ? '✔️😊' : '❌😴';
     icon.className = success ? 'success' : 'fail';
 
-    const key = userKey(name,'history');
-    const data = JSON.parse(localStorage.getItem(key) || '[]');
-    const today = new Date().toDateString();
-
-    if (!data.some(d => new Date(d.date).toDateString() === today)) {
-      data.unshift({ date: now.toISOString(), success });
-    }
-
-    localStorage.setItem(key, JSON.stringify(data));
-
-    renderWeekly(data);
-    renderSummary(data, success);
+    const msg = (success ? successMessages : failMessages)[Math.floor(Math.random()*2)];
+    document.getElementById('summary').innerHTML = msg;
   }
 
-  function renderWeekly(data) {
-    const tbody = document.getElementById('weekly');
-    tbody.innerHTML = '';
-
-    data.slice(0,7).reverse().forEach(d => {
-      const tr = document.createElement('tr');
-      const day = document.createElement('td');
-      const res = document.createElement('td');
-      const date = new Date(d.date);
-
-      day.textContent = days[date.getDay()];
-      res.textContent = d.success ? '✔️' : '❌';
-      res.className = d.success ? 'success' : 'fail';
-
-      tr.appendChild(day);
-      tr.appendChild(res);
-      tbody.appendChild(tr);
-    });
+  function toggleMusic() {
+    const audio = document.getElementById('bgm');
+    if (audio.paused) audio.play(); else audio.pause();
   }
-
-  function renderSummary(data, success) {
-    const last7 = data.slice(0,7);
-    const successCount = last7.filter(d => d.success).length;
-
-    let streak = 0;
-    for (let i = 0; i < last7.length; i++) {
-      if (last7[i].success) streak++;
-      else break;
-    }
-
-    const msgs = success ? successMessages : failMessages;
-    const msg = msgs[Math.floor(Math.random()*msgs.length)];
-
-    let text = `השבוע: ${successCount} מתוך ${last7.length} בזמן 💙<br>${msg}`;
-    if (streak >= 5) text += '<br>✨ 5 לילות ברצף! איזה הישג ✨';
-
-    document.getElementById('summary').innerHTML = text;
-
-    const rare = document.getElementById('rare');
-    rare.innerHTML = '';
-    if (Math.random() < 0.15) {
-      rare.textContent = rareSurprises[Math.floor(Math.random()*rareSurprises.length)];
-    }
-  }
-
-  setTimeout(() => {
-    document.getElementById('splash').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-  }, 2200);
 </script>
 
 </body>
